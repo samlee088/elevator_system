@@ -103,3 +103,120 @@ class Elevator:
     
     def set_emergency_status(self, status):
         self.emergency_status = status
+
+
+class PassengerElevator(Elevator):
+
+    def __init__(self, current_floor, emergency_status):
+        super().__init__(current_floor, emergency_status)
+        self.passenger_up_queue = []
+        self.passenger_down_queue = []
+
+    def operate(self):
+        while self.passenger_up_queue or self.passenger_down_queue:
+            self.process_requests()
+        self.set_state(State.IDLE)
+        print("All requests have been fulfilled, elevator is now", self.get_state())
+    
+    def process_emergency(self):
+        self.passenger_up_queue.clear()
+        self.passenger_down_queue.clear()
+        self.set_current_floor(1)
+        self.set_state(State.idle)
+        self.open_doors()
+        self.set_emergency_status(True)
+        print("Queues cleared, current floor is",
+              self.get_current_floor(), ". Doors are", self.get_door_state())
+        
+    def add_up_request(self, request):
+        if request.get_origin() == RequestOrigin.OUTSIDE:
+            pick_up_request = Request(request.get_origin(), request.get_origin_floor(), request.get_origin_floor())
+            heapq.heappush(self.passenger_up_queue, pick_up_request)
+        heapq.heappush(self.passenger_up_queue, request)
+
+    def add_down_request(self, request):
+        if request.get_origin() == RequestOrigin.OUTSIDE:
+            pick_up_request = Request(request.get_origin(), request.get_origin_floor, request.get_origin_floor())
+            heapq.heappush(self.passenger_down_queue, pick_up_request)
+        heapq.heappush(self.passenger_down_queue, request)
+
+    def process_up_requests(self):
+        while self.passenger_up_queue:
+            up_request = heapq.heappop(self.passenger_up_queue)
+
+            if self.get_current_floor() == up_request.get_destination_floor():
+                print("Currently on floor", self.get_current_floor(),
+                      ". No movement as destination is the same.")
+                continue
+            print("The current floor is", self.get_current_floor(),
+                  ". Next stop:", up_request.get_destination_floor())
+            
+            try:
+                print("Moving ", end="")
+                for _ in range(3):
+                    print(".", end="", flush=True)
+                    time.sleep(0.5)  # Pause for half a second between dots.
+                time.sleep(1)  # Assuming 1 second to move to the next floor.
+                print()
+            except KeyboardInterrupt:
+                pass
+            except Exception as e:
+                print("Error:", e)
+
+            self.set_current_floor(up_request.get_destination_floor())
+            print("Arrived at", self.get_current_floor())
+
+            self.open_doors()
+            # Simulating 3 seconds for people to enter/exit.
+            self.wait_for_seconds(3)
+            self.close_doors()
+
+        print("Finished processing all the up requests.")
+
+    def process_down_requests(self):
+        while self.passenger_down_queue:
+            down_request = heapq.heappop(self.passenger_down_queue)
+
+            if self.get_current_floor() == down_request.get_destination_floor():
+                print("Currently on floor", self.get_current_floor(),
+                      ". No movement as destination is the same.")
+                continue
+
+            print("The current floor is", self.get_current_floor(),
+                  ". Next stop:", down_request.get_destination_floor())
+
+            try:
+                print("Moving ", end="")
+                for _ in range(3):
+                    print(".", end="", flush=True)
+                    time.sleep(0.5)  # Pause for half a second between dots.
+                time.sleep(1)  # Assuming 1 second to move to the next floor.
+                print()
+            except KeyboardInterrupt:
+                pass
+            except Exception as e:
+                print("Error:", e)
+
+            self.set_current_floor(down_request.get_destination_floor())
+            print("Arrived at", self.get_current_floor())
+
+            self.open_doors()
+            # Simulating 3 seconds for people to enter/exit.
+            self.wait_for_seconds(3)
+            self.close_doors()
+
+        print("Finished processing all the down requests.")
+
+    def process_requests(self):
+        if self.get_state() == State.UP or self.get_state() == State.IDLE:
+            self.process_up_requests()
+            if self.passenger_down_queue:
+                print("Now processing down requests...")
+                self.process_down_requests()
+        else:
+            self.process_down_requests()
+            if self.process_up_requests:
+                print("Now processing up requests...")
+                self.process_up_requests()
+
+                
