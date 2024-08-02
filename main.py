@@ -61,3 +61,45 @@ class ServiceRequest(Request):
         else:
             super().__init__(origin, destination_floor)
         self.elevator_type = ElevatorType.SERVICE
+
+class Elevator:
+    def __init__(self, current_floor, emergency_status):
+        self.current_floor = current_floor
+        self.state = State.IDLE
+        self.emergency_status = emergency_status
+        self.door_state = DoorState.CLOSED
+
+    def open_doors(self):
+        self.door_state = DoorState.OPEN
+        print(f"Doors are OPEN on floor {self.current_floor}")
+
+    def close_doors(self):
+        self.door_state = DoorState.CLOSED
+        print("Doors are CLOSED")
+
+    def wait_for_seconds(self, seconds):
+        time.sleep(seconds)
+
+    def operate(self):
+        pass
+
+    def process_emergency(self):
+        pass
+
+    def get_current_floor(self):
+        return self.current_floor
+    
+    def get_state(self):
+        return self.state
+    
+    def set_state(self, state):
+        self.state = state
+
+    def set_current_floor(self, floor):
+        self.current_floor = floor
+
+    def get_door_state(self):
+        return self.door_state
+    
+    def set_emergency_status(self, status):
+        self.emergency_status = status
