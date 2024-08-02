@@ -53,4 +53,11 @@ class Request:
     def _lt_(self, other):
         return self.destination_floor < other.destination_floor
     
-    
+
+class ServiceRequest(Request):
+    def __init__(self, origin, current_floor = None, destination_floor = None):
+        if current_floor is not None and destination_floor is not None:
+            super().__init__(origin, current_floor, destination_floor)
+        else:
+            super().__init__(origin, destination_floor)
+        self.elevator_type = ElevatorType.SERVICE
