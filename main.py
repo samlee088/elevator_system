@@ -277,3 +277,29 @@ class ElevatorFactory:
         else:
             return None
         
+class Controller:
+    def __init__(self, factory):
+        self.factory = factory
+        self.passenger_elevator = factory.create_elevator(ElevatorType.PASSENGER)
+        self.service_elevator = factory.create_elevator(ElevatorType.SERVICE)
+
+    def send_passenger_up_requests(self, request):
+        self.passenger_elevator.add_up_request(request)
+    
+    def send_passenger_down_requests(self, request):
+        self.passenger_elevator.add_down_request(request)
+
+    def send_service_request(self, request):
+        self.service_elevator.add_request_to_queue(request)
+
+    def handle_passenger_requests(self):
+        self.passenger_elevator.operate()
+
+    def handle_service_requests(self):
+        self.service_elevator.operate()
+
+    def handle_emergency(self):
+        self.passenger_elevator.process_emergency()
+        self.service_elevator.process_emergency()
+
+    
